@@ -1,4 +1,3 @@
-// src/index.jsx
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
@@ -60,7 +59,7 @@ function useAuth(){
 }
 
 /* =========================
-   Server clock + windows
+   Server clock + helpers
    ========================= */
 function useServerClock(){
   const [now, setNow] = React.useState(null);
@@ -107,7 +106,7 @@ function useGate(now, isoStart, isoEnd, mode='R1'){
   } else {
     if (!start) return { status:'unset' };
     if (now < start) return { status:'locked', opensAt:start };
-    return { status:'open', endsAt:end || null }; // R2 end optional
+    return { status:'open', endsAt:end || null };
   }
 }
 
@@ -147,7 +146,7 @@ const isRound2Done      = ()=> !!localStorage.getItem('round2_done');
 const isRound2Qualified = ()=> !!localStorage.getItem('round2_qualified');
 
 /* =========================
-   Nav  (✅ Badge removed here)
+   Nav
    ========================= */
 function Nav({auth}){
   const token = auth.token;
@@ -155,12 +154,13 @@ function Nav({auth}){
   return (
     <header className="nav">
       <div className="nav-inner">
-        <Link to="/" className="brand" aria-label="NIT Silchar Hackathon 2026 Home">
+        <Link to="/" className="brand">
           <span>NIT SILCHAR HACKATHON 2026</span>
         </Link>
         <nav className="nav-links">
           <Link to="/schedule">Schedule</Link>
           <Link to="/leaderboard">Leaderboard</Link>
+          <Link to="/event-info">Event Info</Link>
           <Link to="/contact">Contact</Link>
 
           {!token && <Link className="btn ghost" to="/register">Register</Link>}
@@ -180,7 +180,7 @@ function Nav({auth}){
 }
 
 /* =========================
-   Home
+   Home Page
    ========================= */
 function Home({auth}){
   const token = auth.token;
@@ -189,19 +189,15 @@ function Home({auth}){
       <section className="hero">
         <div className="hero-left">
           <span className="pill">National-Level Competition</span>
-          <h1 className="hero-title">
-            Hackathon <span className="year">2026</span>
-          </h1>
+          <h1 className="hero-title">Hackathon <span className="year">2026</span></h1>
           <p className="hero-sub">
             Showcase your AI/ML and problem-solving skills at NIT Silchar.
             Exactly 3 members per team • Round 1 MCQ • Round 2 Coding • Round 3 On-Campus Finale.
           </p>
-
           <div className="hero-cta">
             {!token && <Link className="btn primary xl" to="/register">Register Now</Link>}
             <Link className="btn" to="/schedule">View Schedule</Link>
           </div>
-
           <div className="stats">
             <Stat n="3" label="Competition Rounds" />
             <Stat n="₹1.2L" label="Prize Pool" accent />
@@ -209,12 +205,11 @@ function Home({auth}){
             <Stat n="NIT" label="Silchar, Assam" accent />
           </div>
         </div>
-
         <div className="hero-right">
           <div className="glass-card img-card hero-media">
             <img
               className="hero-img"
-              alt="College students collaborating on code"
+              alt="Students collaborating"
               loading="lazy"
               src="https://images.unsplash.com/photo-1556761175-4b46a572b786?q=80&w=1400&auto=format&fit=crop"
             />
@@ -229,6 +224,74 @@ function Stat({n,label,accent}) {
     <div className={`stat ${accent ? 'accent' : ''}`}>
       <div className="stat-n">{n}</div>
       <div className="stat-l">{label}</div>
+    </div>
+  );
+}
+
+/* =========================
+   NEW: Event Info Page
+   ========================= */
+function EventInfo() {
+  const [info, setInfo] = React.useState(null);
+
+  React.useEffect(() => {
+    axios.get(API_BASE + '/api/event-info')
+      .then(r => setInfo(r.data))
+      .catch(() => setInfo(null));
+  }, []);
+
+  if (!info) return <div className="container">Loading event details...</div>;
+
+  return (
+    <div className="container">
+      <div className="card glass-card">
+        <h2>Hackathon 2026 – Event Information</h2>
+
+        <h3>🏆 Prizes & Recognition</h3>
+        <ul className="list">
+          <li>1st Prize: ₹{info.prizes.first.amount} + {info.prizes.first.desc}</li>
+          <li>2nd Prize: ₹{info.prizes.second.amount} + {info.prizes.second.desc}</li>
+          <li>3rd Prize: ₹{info.prizes.third.amount} + {info.prizes.third.desc}</li>
+        </ul>
+
+        <h3>📜 Certificates for Participants</h3>
+        <ul className="list">
+          {info.certificates.map((c, i) => (
+            <li key={i}><b>{c.type}:</b> {c.desc}</li>
+          ))}
+        </ul>
+
+        <h3>📝 Registration Details</h3>
+        <ul className="list">
+          <li><b>Deadline:</b> {info.registration.deadline}</li>
+          <li><b>Fee:</b> ₹{info.registration.fee} per team</li>
+          <li><b>Account Number:</b> {info.registration.account.number}</li>
+          <li><b>Account Holder:</b> {info.registration.account.holder}</li>
+          <li><b>Bank:</b> {info.registration.account.bank}</li>
+          <li><b>IFSC:</b> {info.registration.account.ifsc}</li>
+          <li><b>MICR:</b> {info.registration.account.micr}</li>
+        </ul>
+
+        <h3>🏠 Accommodation & Activities</h3>
+        <ul className="list">
+          <li>{info.accommodation}</li>
+          <li>{info.local_visit}</li>
+          <li>{info.gala_dinner}</li>
+          <li>Registration Form: {info.registration_link}</li>
+        </ul>
+
+        <h3>👨‍🏫 Organizing Team</h3>
+        <p>{info.organizing_team}</p>
+
+        <h3>📞 Contact</h3>
+        <ul className="list">
+          <li>{info.contact.name}</li>
+          <li>Email: <a className="link" href={`mailto:${info.contact.email}`}>{info.contact.email}</a></li>
+        </ul>
+
+        <h3>📚 Conclusion</h3>
+        <p>{info.conclusion}</p>
+      </div>
     </div>
   );
 }
@@ -1048,8 +1111,7 @@ function App(){
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/results" element={<Results auth={auth} />} />
-        {/* Admin */}
-        <Route path="/admin" element={<Admin auth={auth} />} />
+        <Route path="/event-info" element={<EventInfo />} /> {/* 👈 new route */}
         <Route path="/superadmin" element={<Admin auth={auth} />} />
       </Routes>
     </BrowserRouter>
