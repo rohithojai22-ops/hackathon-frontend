@@ -314,7 +314,7 @@ function Login({auth}){
           <input className="input" placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)} required />
           <button className="btn primary" disabled={loading}>{loading ? 'Logging in…' : 'Login'}</button>
         </form>
-        <p className="muted small">Admin? <b>admin@nits.ac.in</b> / <b>admin123</b></p>
+        <p className="muted small">Use your registered credentials to log in.</p>
       </div>
     </div>
   );
