@@ -5,7 +5,7 @@ import axios from 'axios';
 import { API_BASE } from './config';
 import './index.css';
 import './style.css';
-import './ui_magic/styles.css';
+
 
 /* ===== Time helpers (IST everywhere) ===== */
 const IST = 'Asia/Kolkata';
