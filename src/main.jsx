@@ -808,7 +808,7 @@ function Admin({auth}){
 };
 
   const updMcq = async (id,m)=>{ await axios.put(API_BASE+`/api/admin/mcqs/${id}`, m, hdr); const r = await axios.get(API_BASE+'/api/admin/mcqs', hdr); setMcqs(r.data); };
-  const delMcq = async (id)=>{ await axios.delete(API_BASE+`/api/admin/mcqs/${_id}`, hdr); const r = await axios.get(API_BASE+'/api/admin/mcqs', hdr); setMcqs(r.data); };
+  const delMcq = async (id)=>{ await axios.delete(API_BASE+`/api/admin/mcqs/${id}`, hdr); const r = await axios.get(API_BASE+'/api/admin/mcqs', hdr); setMcqs(r.data); };
 const delProb = async (id) => {
   try {
     await axios.delete(API_BASE + `/api/admin/problems/${id}`, hdr);
