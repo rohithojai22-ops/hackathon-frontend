@@ -736,6 +736,8 @@ function Admin({auth}){
   const [mcqs,setMcqs] = React.useState([]);
   const [teams,setTeams] = React.useState([]);
   const [subs,setSubs]   = React.useState([]);
+  const [problems, setProblems] = React.useState([]);
+
   const [q,setQ] = React.useState({question:'',opt_a:'',opt_b:'',opt_c:'',opt_d:'',correct:'a'});
   const [p,setP] = React.useState({title:'',statement:''});
   const [schedule, setSchedule] = React.useState([]);
@@ -753,6 +755,9 @@ function Admin({auth}){
     axios.get(API_BASE+'/api/admin/teams', hdr).then(r=> setTeams(r.data)).catch(()=>setTeams([]));
     axios.get(API_BASE+'/api/admin/submissions', hdr).then(r=> setSubs(r.data)).catch(()=>setSubs([]));
     axios.get(API_BASE+'/api/schedule').then(r=> setSchedule(r.data)).catch(()=>setSchedule([]));
+    axios.get(API_BASE+'/api/admin/problems', hdr).then(r => setProblems(r.data)).catch(() => setProblems([]));
+
+
     axios.get(API_BASE+'/api/admin/event-settings', hdr).then(r=>{
       setR1start(r.data.round1.start_iso || '');
       setR1end(r.data.round1.end_iso || '');
@@ -805,7 +810,15 @@ function Admin({auth}){
   const updMcq = async (id,m)=>{ await axios.put(API_BASE+`/api/admin/mcqs/${id}`, m, hdr); const r = await axios.get(API_BASE+'/api/admin/mcqs', hdr); setMcqs(r.data); };
   const delMcq = async (id)=>{ await axios.delete(API_BASE+`/api/admin/mcqs/${_id}`, hdr); const r = await axios.get(API_BASE+'/api/admin/mcqs', hdr); setMcqs(r.data); };
 
-  const addProb = async (e)=>{ e.preventDefault(); await axios.post(API_BASE+'/api/admin/problems', p, hdr); await axios.get(API_BASE+'/api/admin/problems', hdr); setP({title:'',statement:''}); };
+const addProb = async (e) => {
+  e.preventDefault();
+  await axios.post(API_BASE + '/api/admin/problems', p, hdr);
+
+  const r = await axios.get(API_BASE + '/api/admin/problems', hdr);
+  setProblems(r.data);
+
+  setP({ title: '', statement: '' });
+};
   const saveWindows = async (e)=>{
     e.preventDefault();
     await axios.put(API_BASE+'/api/admin/event-settings', {
@@ -893,6 +906,18 @@ function Admin({auth}){
               <input className="input" placeholder="statement" value={p.statement} onChange={e=>setP({...p,statement:e.target.value})}/>
               <button className="btn">Add Problem</button>
             </form>
+            <h4 className="mt">Problems ({problems.length})</h4>
+<ul className="list">
+  {problems.map(pr => (
+    <li key={pr._id} className="row-between">
+      <div>
+        <div className="bold">{pr.title}</div>
+        <div className="muted small">{pr.statement}</div>
+      </div>
+      {/* Optional delete later */}
+    </li>
+  ))}
+</ul>
             <h4 className="mt">Teams & Submissions</h4>
             <div className="list small">
   {teams.map(t => (
