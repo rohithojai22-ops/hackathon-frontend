@@ -761,7 +761,47 @@ function Admin({auth}){
     }).catch(()=>{});
   }, [auth.token]);
 
-  const addMcq = async (e)=>{ e.preventDefault(); await axios.post(API_BASE+'/api/admin/mcqs', q, hdr); const r = await axios.get(API_BASE+'/api/admin/mcqs', hdr); setMcqs(r.data); setQ({question:'',opt_a:'',opt_b:'',opt_c:'',opt_d:'',correct:'a'}); };
+  const addMcq = async (e) => {
+  e.preventDefault();
+
+  // VALIDATION
+  if (!q.question.trim()) {
+    alert("Question cannot be empty");
+    return;
+  }
+
+  if (!q.opt_a.trim() || !q.opt_b.trim() || !q.opt_c.trim() || !q.opt_d.trim()) {
+    alert("All 4 options must be filled");
+    return;
+  }
+
+  if (!["a", "b", "c", "d"].includes(q.correct.trim().toLowerCase())) {
+    alert("Correct option must be one of: a, b, c, d");
+    return;
+  }
+
+  try {
+    await axios.post(API_BASE + '/api/admin/mcqs', q, hdr);
+
+    const r = await axios.get(API_BASE + '/api/admin/mcqs', hdr);
+    setMcqs(r.data);
+
+    // reset fields
+    setQ({
+      question: '',
+      opt_a: '',
+      opt_b: '',
+      opt_c: '',
+      opt_d: '',
+      correct: 'a'
+    });
+
+    alert("MCQ added successfully!");
+  } catch (err) {
+    alert("Failed to add MCQ");
+  }
+};
+
   const updMcq = async (id,m)=>{ await axios.put(API_BASE+`/api/admin/mcqs/${id}`, m, hdr); const r = await axios.get(API_BASE+'/api/admin/mcqs', hdr); setMcqs(r.data); };
   const delMcq = async (id)=>{ await axios.delete(API_BASE+`/api/admin/mcqs/${id}`, hdr); const r = await axios.get(API_BASE+'/api/admin/mcqs', hdr); setMcqs(r.data); };
 
