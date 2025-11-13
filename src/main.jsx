@@ -916,13 +916,14 @@ function Admin({auth}){
           </form>
           <ul className="list mt">
             {schedule.map(item=>(
-              <li key={item.id} className="row-between">
+              <li key={item._id} className="row-between">
+
                 <div>
                   <div className="bold">{item.round} — {item.title}</div>
                   <div className="muted small">{item.description}</div>
                   <div className="muted small">Date: {item.date}</div>
                 </div>
-                <button className="btn" onClick={()=>deleteSchedule(item.id)}>Delete</button>
+                 <button className="btn" onClick={()=>deleteSchedule(item._id)}>Delete</button>
               </li>
             ))}
           </ul>
@@ -1076,7 +1077,7 @@ function Schedule(){
         <h2>Event Schedule</h2>
         <ul className="list">
           {items.map(it=>(
-            <li key={it.id}>
+<li key={it._id}>
               <div className="bold">{it.round} — {it.title}</div>
               <div className="muted small">{it.description}</div>
               <div className="muted small">Date: {it.date}</div>
