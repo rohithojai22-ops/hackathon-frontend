@@ -809,6 +809,16 @@ function Admin({auth}){
 
   const updMcq = async (id,m)=>{ await axios.put(API_BASE+`/api/admin/mcqs/${id}`, m, hdr); const r = await axios.get(API_BASE+'/api/admin/mcqs', hdr); setMcqs(r.data); };
   const delMcq = async (id)=>{ await axios.delete(API_BASE+`/api/admin/mcqs/${_id}`, hdr); const r = await axios.get(API_BASE+'/api/admin/mcqs', hdr); setMcqs(r.data); };
+const delProb = async (id) => {
+  try {
+    await axios.delete(API_BASE + `/api/admin/problems/${id}`, hdr);
+    const r = await axios.get(API_BASE + '/api/admin/problems', hdr);
+    setProblems(r.data);
+    alert("Problem deleted");
+  } catch (err) {
+    alert("Failed to delete problem");
+  }
+};
 
 const addProb = async (e) => {
   e.preventDefault();
@@ -914,10 +924,14 @@ const addProb = async (e) => {
         <div className="bold">{pr.title}</div>
         <div className="muted small">{pr.statement}</div>
       </div>
-      {/* Optional delete later */}
+      
+      <button className="btn" onClick={() => delProb(pr._id)}>
+        Delete
+      </button>
     </li>
   ))}
 </ul>
+
             <h4 className="mt">Teams & Submissions</h4>
             <div className="list small">
   {teams.map(t => (
