@@ -803,7 +803,7 @@ function Admin({auth}){
 };
 
   const updMcq = async (id,m)=>{ await axios.put(API_BASE+`/api/admin/mcqs/${id}`, m, hdr); const r = await axios.get(API_BASE+'/api/admin/mcqs', hdr); setMcqs(r.data); };
-  const delMcq = async (id)=>{ await axios.delete(API_BASE+`/api/admin/mcqs/${id}`, hdr); const r = await axios.get(API_BASE+'/api/admin/mcqs', hdr); setMcqs(r.data); };
+  const delMcq = async (id)=>{ await axios.delete(API_BASE+`/api/admin/mcqs/${_id}`, hdr); const r = await axios.get(API_BASE+'/api/admin/mcqs', hdr); setMcqs(r.data); };
 
   const addProb = async (e)=>{ e.preventDefault(); await axios.post(API_BASE+'/api/admin/problems', p, hdr); await axios.get(API_BASE+'/api/admin/problems', hdr); setP({title:'',statement:''}); };
   const saveWindows = async (e)=>{
@@ -875,13 +875,14 @@ function Admin({auth}){
             <h4 className="mt">MCQs ({mcqs.length})</h4>
             <ul className="list">
               {mcqs.map(m=> (
-                <li key={m.id} className="row-between">
-                  <span>{m.question} <em>({m.correct})</em></span>
-                  <span className="row">
-                    <button className="btn" onClick={()=>updMcq(m.id, m)}>Save</button>
-                    <button className="btn" onClick={()=>delMcq(m.id)}>Delete</button>
-                  </span>
-                </li>
+                <li key={m._id} className="row-between">
+  <span>{m.question} <em>({m.correct})</em></span>
+  <span className="row">
+    <button className="btn" onClick={()=>updMcq(m._id, m)}>Save</button>
+    <button className="btn" onClick={()=>delMcq(m._id)}>Delete</button>
+  </span>
+</li>
+
               ))}
             </ul>
           </div>
