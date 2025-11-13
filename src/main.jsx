@@ -774,6 +774,18 @@ function Admin({auth}){
     }, hdr);
     alert('Windows saved');
   };
+  const deleteTeam = async (id) => {
+  if (!window.confirm("Are you sure you want to delete this team?")) return;
+
+  try {
+    await axios.delete(API_BASE + `/api/admin/teams/${id}`, hdr);
+    const r = await axios.get(API_BASE + '/api/admin/teams', hdr);
+    setTeams(r.data);
+    alert("Team deleted successfully!");
+  } catch (err) {
+    alert("Failed to delete team");
+  }
+};
   const addSchedule = async (e)=>{ e.preventDefault(); await axios.post(API_BASE+'/api/admin/schedule', sch, hdr); setSch({round:'',title:'',description:'',date:''}); const r = await axios.get(API_BASE+'/api/schedule'); setSchedule(r.data); };
   const deleteSchedule = async (id)=>{ await axios.delete(API_BASE+`/api/admin/schedule/${id}`, hdr); const r = await axios.get(API_BASE+'/api/schedule'); setSchedule(r.data); };
 
@@ -841,7 +853,15 @@ function Admin({auth}){
               <button className="btn">Add Problem</button>
             </form>
             <h4 className="mt">Teams & Submissions</h4>
-            <div className="list small">{teams.map(t=> <div key={t.id}>• {t.team_name}</div>)}</div>
+            <div className="list small">
+  {teams.map(t => (
+    <div key={t._id} className="row-between">
+      <span>• {t.team_name}</span>
+      <button className="btn" onClick={() => deleteTeam(t._id)}>Delete</button>
+    </div>
+  ))}
+</div>
+
           </div>
         </div>
 
