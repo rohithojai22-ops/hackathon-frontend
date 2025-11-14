@@ -11,11 +11,7 @@ import Locked from "../components_new/Locked";
 import CardInfo from "../components_new/CardInfo";
 import Countdown from "../components_new/Countdown";
 
-import {
-  isRound1Done,
-  isRound1Qualified,
-} from "../utils/flags";
-
+import { isRound1Qualified } from "../utils/flags";
 import { fmtIST } from "../utils/time";
 
 export default function Round2({ auth }) {
@@ -32,9 +28,8 @@ export default function Round2({ auth }) {
   const [loading, setLoading] = React.useState(true);
   const [mySub, setMySub] = React.useState(null);
 
-  const hdr = { headers: { Authorization: "Bearer " + auth.token } };
-
   const qualified = isRound1Qualified();
+  const hdr = { headers: { Authorization: "Bearer " + auth.token } };
 
   React.useEffect(() => {
     async function load() {
@@ -73,54 +68,73 @@ export default function Round2({ auth }) {
     load();
   }, [gate.status, auth.token, qualified]);
 
-  //
-  // =============================
-  //  CONDITIONAL UI SECTION
-  // =============================
-  //
+  // -------------------------------------------------------
+  // NOT QUALIFIED TEAM — UI RULES
+  // -------------------------------------------------------
 
   if (!qualified) {
-    // ❌ NOT QUALIFIED
 
-    if (gate.status === "locked")
-      return <Locked title="Round 2" when={gate.opensAt} now={now} />;
+    // BEFORE START — Show countdown
+    if (gate.status === "locked") {
+      return (
+        <Locked
+          title="Round 2"
+          when={gate.opensAt}
+          now={now}
+        />
+      );
+    }
 
-    if (gate.status === "open")
+    // DURING ROUND — Not Qualified
+    if (gate.status === "open") {
       return (
         <div className="container narrow">
           <div className="card glass-card center">
             <h2>Round 2</h2>
-            <p className="muted">Your team is not qualified for Round-2.</p>
+            <p className="muted">⛔ Your team is not qualified for Round-2.</p>
           </div>
         </div>
       );
+    }
 
-    if (gate.status === "ended")
+    // AFTER END — Not Qualified
+    if (gate.status === "closed") {
       return (
         <div className="container narrow">
           <div className="card glass-card center">
-            <h2>Round 2 – Closed</h2>
-            <p className="muted">Your team is not qualified for Round-2.</p>
+            <h2>Round 2 – Ended</h2>
+            <p className="muted">⛔ Your team is not qualified for Round-2.</p>
           </div>
         </div>
       );
+    }
   }
 
-  //
-  // =============================
-  //  QUALIFIED STUDENT UI
-  // =============================
-  //
+  // -------------------------------------------------------
+  // QUALIFIED TEAM — UI
+  // -------------------------------------------------------
 
   if (gate.status === "loading" || loading)
     return <div className="container">Loading…</div>;
 
   if (gate.status === "unset")
-    return <CardInfo title="Round 2" msg="Admin has not set the Round-2 start time yet." />;
+    return (
+      <CardInfo
+        title="Round 2"
+        msg="Admin has not set the Round-2 start time yet."
+      />
+    );
 
   if (gate.status === "locked")
-    return <Locked title="Round 2 – Problems" when={gate.opensAt} now={now} />;
+    return (
+      <Locked
+        title="Round 2 – Problems"
+        when={gate.opensAt}
+        now={now}
+      />
+    );
 
+  // Already submitted
   if (mySub)
     return (
       <div className="container narrow">
@@ -135,6 +149,19 @@ export default function Round2({ auth }) {
       </div>
     );
 
+  // Round Ended but qualified → no submission allowed
+  if (gate.status === "closed") {
+    return (
+      <div className="container narrow">
+        <div className="card glass-card center">
+          <h2>Round 2 – Ended</h2>
+          <p className="muted">Submission time is over.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Round Open for Qualified team
   return (
     <div className="container narrow">
       <div className="card glass-card">
