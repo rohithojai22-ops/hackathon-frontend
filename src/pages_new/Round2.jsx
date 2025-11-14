@@ -22,9 +22,6 @@ export default function Round2({ auth }) {
   if (!auth.token) return <Navigate to="/login" />;
   if (auth.role === "admin") return <Navigate to="/superadmin" />;
 
-  if (!(isRound1Done() || isRound1Qualified()))
-    return <div className="container">You need to complete or qualify from Round-1 to access Round-2.</div>;
-
   const now = useServerClock();
   const wins = useEventWindows();
   const r2 = wins?.round2;
@@ -37,8 +34,15 @@ export default function Round2({ auth }) {
 
   const hdr = { headers: { Authorization: "Bearer " + auth.token } };
 
+  const qualified = isRound1Qualified();
+
   React.useEffect(() => {
     async function load() {
+      if (!qualified) {
+        setLoading(false);
+        return;
+      }
+
       const ms = await axios
         .get(API_BASE + "/api/round2/my-submission", hdr)
         .then((r) => r.data)
@@ -67,7 +71,46 @@ export default function Round2({ auth }) {
     }
 
     load();
-  }, [gate.status, auth.token]);
+  }, [gate.status, auth.token, qualified]);
+
+  //
+  // =============================
+  //  CONDITIONAL UI SECTION
+  // =============================
+  //
+
+  if (!qualified) {
+    // ❌ NOT QUALIFIED
+
+    if (gate.status === "locked")
+      return <Locked title="Round 2" when={gate.opensAt} now={now} />;
+
+    if (gate.status === "open")
+      return (
+        <div className="container narrow">
+          <div className="card glass-card center">
+            <h2>Round 2</h2>
+            <p className="muted">Your team is not qualified for Round-2.</p>
+          </div>
+        </div>
+      );
+
+    if (gate.status === "ended")
+      return (
+        <div className="container narrow">
+          <div className="card glass-card center">
+            <h2>Round 2 – Closed</h2>
+            <p className="muted">Your team is not qualified for Round-2.</p>
+          </div>
+        </div>
+      );
+  }
+
+  //
+  // =============================
+  //  QUALIFIED STUDENT UI
+  // =============================
+  //
 
   if (gate.status === "loading" || loading)
     return <div className="container">Loading…</div>;
@@ -95,7 +138,7 @@ export default function Round2({ auth }) {
   return (
     <div className="container narrow">
       <div className="card glass-card">
-        
+
         <div className="row-between">
           <h2>Round 2 – Problems</h2>
 
