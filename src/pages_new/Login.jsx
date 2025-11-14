@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { fetchStatusAndSetFlags } from "../utils/flags";
 
 export default function Login({ auth }) {
@@ -7,6 +7,8 @@ export default function Login({ auth }) {
   const [password, setPassword] = React.useState("");
   const [err, setErr] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+
+  const navigate = useNavigate();
 
   const submit = async (e) => {
     e.preventDefault();
@@ -17,15 +19,19 @@ export default function Login({ auth }) {
 
       await auth.login(email, password);
       await fetchStatusAndSetFlags(localStorage.getItem("token"));
+
+      // ✅ Redirect after login
+      if (auth.role === "admin") {
+        navigate("/superadmin");
+      } else {
+        navigate("/dashboard");
+      }
     } catch {
       setErr("Invalid credentials");
     } finally {
       setLoading(false);
     }
   };
-
- // if (auth.token && auth.role === "team") return <Navigate to="/dashboard" />;
- // if (auth.token && auth.role === "admin") return <Navigate to="/superadmin" />;
 
   return (
     <div className="container narrow">
