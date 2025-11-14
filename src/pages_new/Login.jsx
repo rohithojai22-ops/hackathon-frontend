@@ -24,8 +24,8 @@ export default function Login({ auth }) {
     }
   };
 
-  if (auth.token && auth.role === "team") return <Navigate to="/dashboard" />;
-  if (auth.token && auth.role === "admin") return <Navigate to="/superadmin" />;
+ // if (auth.token && auth.role === "team") return <Navigate to="/dashboard" />;
+ // if (auth.token && auth.role === "admin") return <Navigate to="/superadmin" />;
 
   return (
     <div className="container narrow">
