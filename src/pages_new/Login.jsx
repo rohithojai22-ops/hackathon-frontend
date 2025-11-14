@@ -10,28 +10,31 @@ export default function Login({ auth }) {
 
   const navigate = useNavigate();
 
-  const submit = async (e) => {
-    e.preventDefault();
+const submit = async (e) => {
+  e.preventDefault();
 
-    try {
-      setLoading(true);
-      setErr("");
+  try {
+    setLoading(true);
+    setErr("");
 
-      await auth.login(email, password);
-      await fetchStatusAndSetFlags(localStorage.getItem("token"));
+    // login → returns { token, role }
+    const res = await auth.login(email, password);
 
-      // ✅ Redirect after login
-      if (auth.role === "admin") {
-        navigate("/superadmin");
-      } else {
-        navigate("/dashboard");
-      }
-    } catch {
-      setErr("Invalid credentials");
-    } finally {
-      setLoading(false);
+    await fetchStatusAndSetFlags(localStorage.getItem("token"));
+
+    // ✅ Use res.role instead of auth.role
+    if (res.role === "admin") {
+      navigate("/superadmin");
+    } else {
+      navigate("/dashboard");
     }
-  };
+  } catch {
+    setErr("Invalid credentials");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="container narrow">
