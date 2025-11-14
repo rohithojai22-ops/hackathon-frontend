@@ -7,6 +7,8 @@ import {
   isRound2Qualified,
 } from "../utils/flags";
 
+import logo from "../assets/nits-logo.jpeg";   // <-- IMPORTANT
+
 export default function Nav({ auth }) {
   const token = auth.token;
   const isAdmin = auth.role === "admin";
@@ -14,10 +16,14 @@ export default function Nav({ auth }) {
   return (
     <header className="nav">
       <div className="nav-inner">
+
+        {/* ==== LOGO + TITLE ==== */}
         <Link to="/" className="brand">
+          <img src={logo} alt="NIT Silchar Logo" className="brand-logo" />
           <span>NIT SILCHAR HACKATHON 2026</span>
         </Link>
 
+        {/* ==== NAVIGATION LINKS ==== */}
         <nav className="nav-links">
           <Link to="/schedule">Schedule</Link>
           <Link to="/leaderboard">Leaderboard</Link>
@@ -40,6 +46,7 @@ export default function Nav({ auth }) {
           {token && isAdmin && <Link className="btn" to="/superadmin">Admin</Link>}
           {token && <button className="btn" onClick={auth.clear}>Logout</button>}
         </nav>
+
       </div>
     </header>
   );

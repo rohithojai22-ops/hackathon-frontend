@@ -47,14 +47,24 @@ body {
   margin: auto;
 }
 
+/* ---- LOGO + TITLE ---- */
+
 .brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   text-decoration: none;
-  color: var(--brand);              /* BLUE COLOR */
-  font-weight: 800;                 /* BOLD */
-  font-size: 26px;                  /* BIGGER */
+  color: var(--brand);
+  font-weight: 900;
+  font-size: 28px;
   letter-spacing: 0.5px;
 }
 
+.brand-logo {
+  height: 48px;
+  width: 48px;
+  object-fit: contain;
+}
 
 .nav-links {
   display: flex;
