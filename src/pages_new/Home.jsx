@@ -34,6 +34,34 @@ export default function Home({ auth }) {
             <Stat n="3" label="Members / Team" />
             <Stat n="NIT" label="Silchar, Assam" accent />
           </div>
+
+          {/* ⭐ NEW NIT SILCHAR INFO ADDED BELOW ⭐ */}
+          <div className="nit-info">
+            <h3>About NIT Silchar</h3>
+            <p>
+              The National Institute of Technology, Silchar, established in 1967 
+              as a Regional Engineering College, is one of India’s premier 
+              technical institutions. Upgraded to NIT in 2002 and declared an 
+              Institute of National Importance under the NIT Act of 2007, 
+              NIT Silchar excels in education, research, and innovation.
+            </p>
+
+            <h4>Recognitions & Highlights</h4>
+            <ul>
+              <li>Ranked among India’s top engineering institutes.</li>
+              <li>NIRF Ranking 2024: Engineering – <b>40</b>, Overall – <b>92</b>.</li>
+              <li>QS Asia University Ranking 2025: <b>541</b>.</li>
+              <li>Green Metric Global Ranking 2022: <b>205</b>.</li>
+              <li>Hub for advanced research & innovation.</li>
+              <li>Strong national + international collaborations.</li>
+              <li>
+                Legacy of producing top technocrats & researchers for 
+                industry and academia.
+              </li>
+            </ul>
+          </div>
+          {/* ⭐ END NEW BLOCK ⭐ */}        
+
         </div>
 
         <div className="hero-right">

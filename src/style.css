@@ -285,3 +285,21 @@ body{
 .stat.accent .stat-n{
   color: var(--brand);
 }
+.nit-info {
+  margin-top: 30px;
+  padding: 20px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(6px);
+}
+
+.nit-info h3, .nit-info h4 {
+  color: #1e40af;
+  margin-bottom: 8px;
+}
+
+.nit-info ul {
+  margin-top: 10px;
+  padding-left: 20px;
+  line-height: 1.6;
+}
