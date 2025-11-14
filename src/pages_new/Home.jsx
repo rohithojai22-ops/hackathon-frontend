@@ -7,6 +7,8 @@ export default function Home({ auth }) {
 
   return (
     <main className="container">
+
+      {/* ================= HERO ================= */}
       <section className="hero">
         <div className="hero-left">
 
@@ -23,7 +25,9 @@ export default function Home({ auth }) {
 
           <div className="hero-cta">
             {!token && (
-              <Link className="btn primary xl" to="/register">Register Now</Link>
+              <Link className="btn primary xl" to="/register">
+                Register Now
+              </Link>
             )}
             <Link className="btn" to="/schedule">View Schedule</Link>
           </div>
@@ -34,38 +38,11 @@ export default function Home({ auth }) {
             <Stat n="3" label="Members / Team" />
             <Stat n="NIT" label="Silchar, Assam" accent />
           </div>
-
-          {/* ⭐ NEW NIT SILCHAR INFO ADDED BELOW ⭐ */}
-          <div className="nit-info">
-            <h3>About NIT Silchar</h3>
-            <p>
-              The National Institute of Technology, Silchar, established in 1967 
-              as a Regional Engineering College, is one of India’s premier 
-              technical institutions. Upgraded to NIT in 2002 and declared an 
-              Institute of National Importance under the NIT Act of 2007, 
-              NIT Silchar excels in education, research, and innovation.
-            </p>
-
-            <h4>Recognitions & Highlights</h4>
-            <ul>
-              <li>Ranked among India’s top engineering institutes.</li>
-              <li>NIRF Ranking 2024: Engineering – <b>40</b>, Overall – <b>92</b>.</li>
-              <li>QS Asia University Ranking 2025: <b>541</b>.</li>
-              <li>Green Metric Global Ranking 2022: <b>205</b>.</li>
-              <li>Hub for advanced research & innovation.</li>
-              <li>Strong national + international collaborations.</li>
-              <li>
-                Legacy of producing top technocrats & researchers for 
-                industry and academia.
-              </li>
-            </ul>
-          </div>
-          {/* ⭐ END NEW BLOCK ⭐ */}        
-
         </div>
 
+        {/* HERO IMAGE – FIXED SIZE */}
         <div className="hero-right">
-          <div className="glass-card img-card hero-media">
+          <div className="hero-media">
             <img
               className="hero-img"
               alt="Students collaborating"
@@ -75,6 +52,40 @@ export default function Home({ auth }) {
           </div>
         </div>
       </section>
+
+
+      {/* =============== ABOUT NIT SECTION =============== */}
+      <section className="nit-section card">
+
+        <h2>About NIT Silchar</h2>
+
+        <p>
+          The National Institute of Technology, Silchar, established in 1967 as a Regional
+          Engineering College, is one of India’s premier technical institutions. Upgraded to NIT
+          in 2002 and declared an Institute of National Importance under the NIT Act of 2007, NIT
+          Silchar stands out for its excellence in education, research, and innovation.
+        </p>
+
+        <h3>Recognitions & Highlights</h3>
+
+        <ul>
+          <li>
+            Ranked among India’s top engineering institutes: NIRF 2024 — Engineering Rank 40,
+            Overall 92.
+          </li>
+          <li>QS Asia University Ranking 2025: Position 541.</li>
+          <li>Ranked 205th globally in Green Metric Ranking 2022.</li>
+          <li>Hub for advanced AI/ML, research labs, and innovation ecosystems.</li>
+          <li>Strong international and industry collaborations.</li>
+        </ul>
+
+        <p className="nit-bottom">
+          NIT Silchar continues to nurture technocrats and researchers who shape global industries
+          and academia.
+        </p>
+
+      </section>
+
     </main>
   );
 }
