@@ -49,10 +49,12 @@ body {
 
 .brand {
   text-decoration: none;
-  color: var(--text);
-  font-weight: 700;
-  font-size: 18px;
+  color: var(--brand);              /* BLUE COLOR */
+  font-weight: 800;                 /* BOLD */
+  font-size: 26px;                  /* BIGGER */
+  letter-spacing: 0.5px;
 }
+
 
 .nav-links {
   display: flex;
