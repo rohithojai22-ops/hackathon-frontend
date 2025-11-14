@@ -337,3 +337,10 @@ body {
   margin-top: 16px;
   color: var(--text-muted);
 }
+
+.nav-logo {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+  margin-right: 10px;
+}
