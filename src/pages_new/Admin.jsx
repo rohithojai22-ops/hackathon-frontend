@@ -49,7 +49,7 @@ export default function Admin({ auth }) {
     axios.get(API_BASE + "/api/schedule").then((r) => setSchedule(r.data));
 
     // FIXED: correct event-settings structure
-    axios.get(API_BASE + "/api/admin/event-settings", hdr).then((r) => {
+    axios.get(API_BASE + "/api/event-settings", hdr).then((r) => {
       if (r.data.round1) {
         setR1start(r.data.round1.start_iso || "");
         setR1end(r.data.round1.end_iso || "");
