@@ -38,26 +38,34 @@ export default function Admin({ auth }) {
 
   const hdr = { headers: { Authorization: "Bearer " + auth.token } };
 
+  // ================================
+  // LOAD ALL ADMIN DATA INCLUDING WINDOWS
+  // ================================
   React.useEffect(() => {
     axios.get(API_BASE + "/api/admin/mcqs", hdr).then((r) => setMcqs(r.data));
     axios.get(API_BASE + "/api/admin/teams", hdr).then((r) => setTeams(r.data));
     axios.get(API_BASE + "/api/admin/submissions", hdr).then((r) => setSubs(r.data));
     axios.get(API_BASE + "/api/admin/problems", hdr).then((r) => setProblems(r.data));
-
     axios.get(API_BASE + "/api/schedule").then((r) => setSchedule(r.data));
 
-    axios.get(API_BASE + "/api/admin/event-settings", hdr).then((r) => {
-  setR1start(r.data.round1_start_iso || "");
-  setR1end(r.data.round1_end_iso || "");
-  setR2start(r.data.round2_start_iso || "");
-  setR2end(r.data.round2_end_iso || "");
-});
-
+    // FIXED: correct event-settings structure
+    axios.get(API_BASE + "/api/event-settings", hdr).then((r) => {
+      if (r.data.round1) {
+        setR1start(r.data.round1.start_iso || "");
+        setR1end(r.data.round1.end_iso || "");
+      }
+      if (r.data.round2) {
+        setR2start(r.data.round2.start_iso || "");
+        setR2end(r.data.round2.end_iso || "");
+      }
+    });
   }, [auth.token]);
 
+  // ================================
+  // MCQ FUNCTIONS
+  // ================================
   const addMcq = async (e) => {
     e.preventDefault();
-
     if (!q.question.trim()) return alert("Question cannot be empty");
 
     await axios.post(API_BASE + "/api/admin/mcqs", q, hdr);
@@ -65,8 +73,6 @@ export default function Admin({ auth }) {
     setMcqs(r.data);
 
     setQ({ question: "", opt_a: "", opt_b: "", opt_c: "", opt_d: "", correct: "a" });
-
-    alert("MCQ added successfully!");
   };
 
   const delMcq = async (id) => {
@@ -75,13 +81,14 @@ export default function Admin({ auth }) {
     setMcqs(r.data);
   };
 
+  // ================================
+  // PROBLEM FUNCTIONS
+  // ================================
   const addProb = async (e) => {
     e.preventDefault();
-
     await axios.post(API_BASE + "/api/admin/problems", p, hdr);
     const r = await axios.get(API_BASE + "/api/admin/problems", hdr);
     setProblems(r.data);
-
     setP({ title: "", statement: "" });
   };
 
@@ -91,6 +98,9 @@ export default function Admin({ auth }) {
     setProblems(r.data);
   };
 
+  // ================================
+  // TEAM DELETE
+  // ================================
   const deleteTeam = async (id) => {
     if (!window.confirm("Are you sure you want to delete this team?")) return;
 
@@ -99,9 +109,11 @@ export default function Admin({ auth }) {
     setTeams(r.data);
   };
 
+  // ================================
+  // SCHEDULE FUNCTIONS
+  // ================================
   const addSchedule = async (e) => {
     e.preventDefault();
-
     await axios.post(API_BASE + "/api/admin/schedule", sch, hdr);
     setSch({ round: "", title: "", description: "", date: "" });
 
@@ -115,6 +127,9 @@ export default function Admin({ auth }) {
     setSchedule(r.data);
   };
 
+  // ================================
+  // SAVE ROUND WINDOWS
+  // ================================
   const saveWindows = async (e) => {
     e.preventDefault();
 
@@ -132,11 +147,17 @@ export default function Admin({ auth }) {
     alert("Windows saved");
   };
 
+  // ================================
+  // SHORTLIST COMPUTE
+  // ================================
   const computeShortlist = async () => {
     await axios.post(API_BASE + "/api/admin/compute-shortlist", {}, hdr);
     alert("Shortlist computed successfully!");
   };
 
+  // ================================
+  // RENDER
+  // ================================
   return (
     <div className="container">
       <div className="card glass-card">
@@ -173,16 +194,13 @@ export default function Admin({ auth }) {
               onChange={(e) => setQ({ ...q, [k]: e.target.value })}
             />
           ))}
-
           <button className="btn">Add MCQ</button>
         </form>
 
         <ul className="list mt">
           {mcqs.map((m) => (
             <li key={m._id} className="row-between">
-              <span>
-                {m.question} <em>({m.correct})</em>
-              </span>
+              <span>{m.question} <em>({m.correct})</em></span>
               <button className="btn" onClick={() => delMcq(m._id)}>Delete</button>
             </li>
           ))}
@@ -241,6 +259,7 @@ export default function Admin({ auth }) {
             </li>
           ))}
         </ul>
+
       </div>
     </div>
   );
