@@ -46,12 +46,13 @@ export default function Admin({ auth }) {
 
     axios.get(API_BASE + "/api/schedule").then((r) => setSchedule(r.data));
 
-    axios.get(API_BASE + "/api/admin/event-settings", hdr).then((r) => {
-      setR1start(r.data.round1.start_iso || "");
-      setR1end(r.data.round1.end_iso || "");
-      setR2start(r.data.round2.start_iso || "");
-      setR2end(r.data.round2.end_iso || "");
-    });
+    axios.get(API_BASE + "/api/admin/windows", hdr).then((r) => {
+  setR1start(r.data.r1_start || "");
+  setR1end(r.data.r1_end || "");
+  setR2start(r.data.r2_start || "");
+  setR2end(r.data.r2_end || "");
+});
+
   }, [auth.token]);
 
   const addMcq = async (e) => {
@@ -117,16 +118,17 @@ export default function Admin({ auth }) {
   const saveWindows = async (e) => {
     e.preventDefault();
 
-    await axios.put(
-      API_BASE + "/api/admin/event-settings",
-      {
-        round1_start_iso: r1start,
-        round1_end_iso: r1end,
-        round2_start_iso: r2start,
-        round2_end_iso: r2end,
-      },
-      hdr
-    );
+    await axios.post(
+  API_BASE + "/api/admin/windows",
+  {
+    r1_start: r1start,
+    r1_end: r1end,
+    r2_start: r2start,
+    r2_end: r2end,
+  },
+  hdr
+);
+
 
     alert("Windows saved");
   };
