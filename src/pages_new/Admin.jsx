@@ -31,6 +31,7 @@ export default function Admin({ auth }) {
     date: "",
   });
 
+  // ==== ROUND WINDOWS ====
   const [r1start, setR1start] = React.useState("");
   const [r1end, setR1end] = React.useState("");
   const [r2start, setR2start] = React.useState("");
@@ -46,26 +47,23 @@ export default function Admin({ auth }) {
 
     axios.get(API_BASE + "/api/schedule").then((r) => setSchedule(r.data));
 
+    // === Load saved round windows ===
     axios.get(API_BASE + "/api/admin/windows", hdr).then((r) => {
-  setR1start(r.data.r1_start || "");
-  setR1end(r.data.r1_end || "");
-  setR2start(r.data.r2_start || "");
-  setR2end(r.data.r2_end || "");
-});
-
+      setR1start(r.data.r1_start ? r.data.r1_start.slice(0, 16) : "");
+      setR1end(r.data.r1_end ? r.data.r1_end.slice(0, 16) : "");
+      setR2start(r.data.r2_start ? r.data.r2_start.slice(0, 16) : "");
+      setR2end(r.data.r2_end ? r.data.r2_end.slice(0, 16) : "");
+    });
   }, [auth.token]);
 
   const addMcq = async (e) => {
     e.preventDefault();
-
     if (!q.question.trim()) return alert("Question cannot be empty");
 
     await axios.post(API_BASE + "/api/admin/mcqs", q, hdr);
     const r = await axios.get(API_BASE + "/api/admin/mcqs", hdr);
     setMcqs(r.data);
-
     setQ({ question: "", opt_a: "", opt_b: "", opt_c: "", opt_d: "", correct: "a" });
-
     alert("MCQ added successfully!");
   };
 
@@ -77,11 +75,10 @@ export default function Admin({ auth }) {
 
   const addProb = async (e) => {
     e.preventDefault();
-
     await axios.post(API_BASE + "/api/admin/problems", p, hdr);
+
     const r = await axios.get(API_BASE + "/api/admin/problems", hdr);
     setProblems(r.data);
-
     setP({ title: "", statement: "" });
   };
 
@@ -92,7 +89,7 @@ export default function Admin({ auth }) {
   };
 
   const deleteTeam = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this team?")) return;
+    if (!window.confirm("Are you sure?")) return;
 
     await axios.delete(API_BASE + `/api/admin/teams/${id}`, hdr);
     const r = await axios.get(API_BASE + "/api/admin/teams", hdr);
@@ -115,22 +112,22 @@ export default function Admin({ auth }) {
     setSchedule(r.data);
   };
 
+  // === SAVE WINDOWS ===
   const saveWindows = async (e) => {
     e.preventDefault();
 
     await axios.post(
-  API_BASE + "/api/admin/windows",
-  {
-    r1_start: r1start,
-    r1_end: r1end,
-    r2_start: r2start,
-    r2_end: r2end,
-  },
-  hdr
-);
+      API_BASE + "/api/admin/windows",
+      {
+        r1_start: r1start ? new Date(r1start).toISOString() : "",
+        r1_end: r1end ? new Date(r1end).toISOString() : "",
+        r2_start: r2start ? new Date(r2start).toISOString() : "",
+        r2_end: r2end ? new Date(r2end).toISOString() : "",
+      },
+      hdr
+    );
 
-
-    alert("Windows saved");
+    alert("Windows saved!");
   };
 
   const computeShortlist = async () => {
@@ -146,54 +143,58 @@ export default function Admin({ auth }) {
         <h3 className="mt">Round Windows</h3>
 
         <form onSubmit={saveWindows} className="grid gap">
-          <input className="input" placeholder="Round-1 Start (ISO)" value={r1start} onChange={(e) => setR1start(e.target.value)} />
-          <input className="input" placeholder="Round-1 End (ISO)" value={r1end} onChange={(e) => setR1end(e.target.value)} />
-          <input className="input" placeholder="Round-2 Start (ISO)" value={r2start} onChange={(e) => setR2start(e.target.value)} />
-          <input className="input" placeholder="Round-2 End (ISO)" value={r2end} onChange={(e) => setR2end(e.target.value)} />
+          
+          <input type="datetime-local" className="input"
+            value={r1start} onChange={(e) => setR1start(e.target.value)} />
+
+          <input type="datetime-local" className="input"
+            value={r1end} onChange={(e) => setR1end(e.target.value)} />
+
+          <input type="datetime-local" className="input"
+            value={r2start} onChange={(e) => setR2start(e.target.value)} />
+
+          <input type="datetime-local" className="input"
+            value={r2end} onChange={(e) => setR2end(e.target.value)} />
 
           <button className="btn primary">Save Windows</button>
-          <button className="btn" type="button" onClick={computeShortlist}>Compute Shortlist</button>
+          <button className="btn" type="button" onClick={computeShortlist}>
+            Compute Shortlist
+          </button>
 
           <div className="muted small">
-            <div>R1 Start: <b>{r1start ? fmtIST(r1start) : "—"}</b></div>
-            <div>R1 End: <b>{r1end ? fmtIST(r1end) : "—"}</b></div>
-            <div>R2 Start: <b>{r2start ? fmtIST(r2start) : "—"}</b></div>
-            <div>R2 End: <b>{r2end ? fmtIST(r2end) : "—"}</b></div>
+            <div>R1 Start: <b>{r1start ? fmtIST(new Date(r1start)) : "—"}</b></div>
+            <div>R1 End: <b>{r1end ? fmtIST(new Date(r1end)) : "—"}</b></div>
+            <div>R2 Start: <b>{r2start ? fmtIST(new Date(r2start)) : "—"}</b></div>
+            <div>R2 End: <b>{r2end ? fmtIST(new Date(r2end)) : "—"}</b></div>
           </div>
         </form>
 
+        {/* ---- MCQs ---- */}
         <h3 className="mt">MCQs</h3>
-
         <form onSubmit={addMcq} className="grid gap">
           {["question", "opt_a", "opt_b", "opt_c", "opt_d", "correct"].map((k) => (
-            <input
-              key={k}
-              className="input"
-              placeholder={k}
-              value={q[k]}
-              onChange={(e) => setQ({ ...q, [k]: e.target.value })}
-            />
+            <input key={k} className="input" placeholder={k}
+              value={q[k]} onChange={(e) => setQ({ ...q, [k]: e.target.value })} />
           ))}
-
           <button className="btn">Add MCQ</button>
         </form>
 
         <ul className="list mt">
           {mcqs.map((m) => (
             <li key={m._id} className="row-between">
-              <span>
-                {m.question} <em>({m.correct})</em>
-              </span>
+              <span>{m.question} <em>({m.correct})</em></span>
               <button className="btn" onClick={() => delMcq(m._id)}>Delete</button>
             </li>
           ))}
         </ul>
 
+        {/* Problems */}
         <h3 className="mt">Problems</h3>
-
         <form onSubmit={addProb} className="grid gap">
-          <input className="input" placeholder="title" value={p.title} onChange={(e) => setP({ ...p, title: e.target.value })} />
-          <input className="input" placeholder="statement" value={p.statement} onChange={(e) => setP({ ...p, statement: e.target.value })} />
+          <input className="input" placeholder="title"
+            value={p.title} onChange={(e) => setP({ ...p, title: e.target.value })} />
+          <input className="input" placeholder="statement"
+            value={p.statement} onChange={(e) => setP({ ...p, statement: e.target.value })} />
           <button className="btn">Add Problem</button>
         </form>
 
@@ -209,8 +210,8 @@ export default function Admin({ auth }) {
           ))}
         </ul>
 
+        {/* Teams */}
         <h3 className="mt">Teams</h3>
-
         <ul className="list small">
           {teams.map((t) => (
             <li key={t._id} className="row-between">
@@ -220,13 +221,17 @@ export default function Admin({ auth }) {
           ))}
         </ul>
 
+        {/* Schedule */}
         <h3 className="mt">Schedule (Public)</h3>
-
         <form onSubmit={addSchedule} className="grid four gap">
-          <input className="input" placeholder="round" value={sch.round} onChange={(e) => setSch({ ...sch, round: e.target.value })} />
-          <input className="input" placeholder="title" value={sch.title} onChange={(e) => setSch({ ...sch, title: e.target.value })} />
-          <input className="input" placeholder="description" value={sch.description} onChange={(e) => setSch({ ...sch, description: e.target.value })} />
-          <input className="input" placeholder="date (YYYY-MM-DD)" value={sch.date} onChange={(e) => setSch({ ...sch, date: e.target.value })} />
+          <input className="input" placeholder="round"
+            value={sch.round} onChange={(e) => setSch({ ...sch, round: e.target.value })} />
+          <input className="input" placeholder="title"
+            value={sch.title} onChange={(e) => setSch({ ...sch, title: e.target.value })} />
+          <input className="input" placeholder="description"
+            value={sch.description} onChange={(e) => setSch({ ...sch, description: e.target.value })} />
+          <input className="input" placeholder="date (YYYY-MM-DD)"
+            value={sch.date} onChange={(e) => setSch({ ...sch, date: e.target.value })} />
           <button className="btn primary">Add</button>
         </form>
 
