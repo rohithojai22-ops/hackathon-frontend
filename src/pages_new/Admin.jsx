@@ -47,11 +47,12 @@ export default function Admin({ auth }) {
     axios.get(API_BASE + "/api/schedule").then((r) => setSchedule(r.data));
 
     axios.get(API_BASE + "/api/admin/event-settings", hdr).then((r) => {
-      setR1start(r.data.round1.start_iso || "");
-      setR1end(r.data.round1.end_iso || "");
-      setR2start(r.data.round2.start_iso || "");
-      setR2end(r.data.round2.end_iso || "");
-    });
+  setR1start(r.data.round1_start_iso || "");
+  setR1end(r.data.round1_end_iso || "");
+  setR2start(r.data.round2_start_iso || "");
+  setR2end(r.data.round2_end_iso || "");
+});
+
   }, [auth.token]);
 
   const addMcq = async (e) => {
