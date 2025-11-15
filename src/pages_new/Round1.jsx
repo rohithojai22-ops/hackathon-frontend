@@ -166,4 +166,4 @@ const gate = useGate(now, r1start, r1end, "R1");
       </div>
     </div>
   );
-} update this code thoroughly and give me
+}
