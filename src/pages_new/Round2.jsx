@@ -22,6 +22,7 @@ export default function Round2({ auth }) {
   const wins = useEventWindows();
   const r2 = wins?.round2;
 
+  // IMPORTANT: r2.start_iso, r2.end_iso MUST MATCH BACKEND
   const gate = useGate(now, r2?.start_iso, r2?.end_iso, "R2");
 
   const [problems, setProblems] = React.useState([]);
@@ -38,6 +39,7 @@ export default function Round2({ auth }) {
         return;
       }
 
+      // CHECK IF USER ALREADY SUBMITTED
       const ms = await axios
         .get(API_BASE + "/api/round2/my-submission", hdr)
         .then((r) => r.data)
@@ -45,16 +47,19 @@ export default function Round2({ auth }) {
 
       setMySub(ms);
 
+      // IF NOT OPEN → no need load questions
       if (gate.status !== "open") {
         setLoading(false);
         return;
       }
 
+      // IF ALREADY SUBMITTED → stop
       if (ms) {
         setLoading(false);
         return;
       }
 
+      // LOAD PROBLEMS
       try {
         const r = await axios.get(API_BASE + "/api/round2/problems", hdr);
         setProblems(r.data || []);
@@ -69,17 +74,13 @@ export default function Round2({ auth }) {
   }, [gate.status, auth.token, qualified]);
 
   // -------------------------------------------------------
-  //           NOT QUALIFIED TEAM UI RULES
+  //                NOT QUALIFIED TEAM UI
   // -------------------------------------------------------
   if (!qualified) {
-
-    // BEFORE ROUND — show countdown
-    if (gate.status === "locked") {
+    if (gate.status === "locked")
       return <Locked title="Round 2" when={gate.opensAt} now={now} />;
-    }
 
-    // DURING ROUND — Not Qualified
-    if (gate.status === "open") {
+    if (gate.status === "open")
       return (
         <div className="container narrow">
           <div className="card glass-card center">
@@ -88,10 +89,8 @@ export default function Round2({ auth }) {
           </div>
         </div>
       );
-    }
 
-    // AFTER END — Not Qualified
-    if (gate.status === "ended") {
+    if (gate.status === "ended")
       return (
         <div className="container narrow">
           <div className="card glass-card center">
@@ -100,11 +99,10 @@ export default function Round2({ auth }) {
           </div>
         </div>
       );
-    }
   }
 
   // -------------------------------------------------------
-  //                QUALIFIED TEAM UI
+  //                QUALIFIED TEAM — UI
   // -------------------------------------------------------
 
   if (gate.status === "loading" || loading)
@@ -114,14 +112,20 @@ export default function Round2({ auth }) {
     return (
       <CardInfo
         title="Round 2"
-        msg="Admin has not set the Round-2 start time yet."
+        msg="Admin has not set the Round-2 window yet."
       />
     );
 
   if (gate.status === "locked")
-    return <Locked title="Round 2 – Problems" when={gate.opensAt} now={now} />;
+    return (
+      <Locked
+        title="Round 2 – Problems"
+        when={gate.opensAt}
+        now={now}
+      />
+    );
 
-  // Already submitted
+  // ALREADY SUBMITTED
   if (mySub)
     return (
       <div className="container narrow">
@@ -136,7 +140,6 @@ export default function Round2({ auth }) {
       </div>
     );
 
-  // AFTER ROUND END — but qualified
   if (gate.status === "ended") {
     return (
       <div className="container narrow">
@@ -148,7 +151,7 @@ export default function Round2({ auth }) {
     );
   }
 
-  // ROUND IS OPEN
+  // ROUND IS OPEN → show problems
   return (
     <div className="container narrow">
       <div className="card glass-card">
@@ -158,7 +161,9 @@ export default function Round2({ auth }) {
 
           {gate.endsAt && (
             <div className="align-right">
-              <p className="muted small">Ends at: <b>{fmtIST(gate.endsAt)}</b></p>
+              <p className="muted small">
+                Ends at: <b>{fmtIST(gate.endsAt)}</b>
+              </p>
               <Countdown now={now} target={gate.endsAt} prefix="Ends in" />
             </div>
           )}
@@ -177,7 +182,6 @@ export default function Round2({ auth }) {
             Upload Solution
           </Link>
         </div>
-
       </div>
     </div>
   );
