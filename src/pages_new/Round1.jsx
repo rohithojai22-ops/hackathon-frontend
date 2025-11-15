@@ -28,8 +28,11 @@ export default function Round1({ auth }) {
   const [loading, setLoading] = React.useState(true);
   const [already, setAlready] = React.useState(false);
 
-  const r1 = wins?.round1;
-  const gate = useGate(now, r1?.start_iso, r1?.end_iso, "R1");
+  const r1start = wins?.round1_start_iso;
+const r1end = wins?.round1_end_iso;
+
+const gate = useGate(now, r1start, r1end, "R1");
+
 
   React.useEffect(() => {
     async function load() {
