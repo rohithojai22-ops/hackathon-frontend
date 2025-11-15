@@ -16,7 +16,9 @@ import { fetchStatusAndSetFlags } from "../utils/flags";
 
 export default function Round1({ auth }) {
   if (!auth.token) return <Navigate to="/login" />;
-  if (auth.role === "admin") return <Navigate to="/superadmin" />;
+  if (auth.role !== "team")
+  return <Navigate to="/login" />;
+
 
   const now = useServerClock();
   const wins = useEventWindows();
