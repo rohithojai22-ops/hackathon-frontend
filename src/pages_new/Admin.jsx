@@ -44,17 +44,13 @@ export default function Admin({ auth }) {
   React.useEffect(() => {
     (async () => {
       try {
-        const [
-          mcqR, teamR, subR, probR, schedR, winR
-        ] = await Promise.all([
-          axios.get(API_BASE + "/api/admin/mcqs", hdr).catch(() => ({ data: [] })),
-          axios.get(API_BASE + "/api/admin/teams", hdr).catch(() => ({ data: [] })),
-          axios.get(API_BASE + "/api/admin/submissions", hdr).catch(() => ({ data: [] })),
-          axios.get(API_BASE + "/api/admin/problems", hdr).catch(() => ({ data: [] })),
-          axios.get(API_BASE + "/api/schedule").catch(() => ({ data: [] })),
-
-          // FIXED — USE ADMIN ROUTE (your backend requires admin auth)
-          axios.get(API_BASE + "/api/admin/event-settings", hdr).catch(() => ({ data: {} })),
+        const [mcqR, teamR, subR, probR, schedR, winR] = await Promise.all([
+          axios.get(API_BASE + "/api/admin/mcqs", hdr),
+          axios.get(API_BASE + "/api/admin/teams", hdr),
+          axios.get(API_BASE + "/api/admin/submissions", hdr),
+          axios.get(API_BASE + "/api/admin/problems", hdr),
+          axios.get(API_BASE + "/api/schedule"),
+          axios.get(API_BASE + "/api/event-settings", hdr),
         ]);
 
         setMcqs(mcqR.data);
@@ -63,6 +59,7 @@ export default function Admin({ auth }) {
         setProblems(probR.data);
         setSchedule(schedR.data);
 
+        // Load window values
         setR1start(winR.data.round1_start_iso || "");
         setR1end(winR.data.round1_end_iso || "");
         setR2start(winR.data.round2_start_iso || "");
@@ -74,36 +71,83 @@ export default function Admin({ auth }) {
   }, [auth.token]);
 
   // ================================
+  // MCQ FUNCTIONS
+  // ================================
+  const addMcq = async (e) => {
+    e.preventDefault();
+    await axios.post(API_BASE + "/api/admin/mcqs", q, hdr);
+    const r = await axios.get(API_BASE + "/api/admin/mcqs", hdr);
+    setMcqs(r.data);
+    setQ({ question: "", opt_a: "", opt_b: "", opt_c: "", opt_d: "", correct: "a" });
+  };
+
+  const delMcq = async (id) => {
+    await axios.delete(API_BASE + `/api/admin/mcqs/${id}`, hdr);
+    const r = await axios.get(API_BASE + "/api/admin/mcqs", hdr);
+    setMcqs(r.data);
+  };
+
+  // ================================
+  // PROBLEM FUNCTIONS
+  // ================================
+  const addProb = async (e) => {
+    e.preventDefault();
+    await axios.post(API_BASE + "/api/admin/problems", p, hdr);
+    const r = await axios.get(API_BASE + "/api/admin/problems", hdr);
+    setProblems(r.data);
+    setP({ title: "", statement: "" });
+  };
+
+  const delProb = async (id) => {
+    await axios.delete(API_BASE + `/api/admin/problems/${id}`, hdr);
+    const r = await axios.get(API_BASE + "/api/admin/problems", hdr);
+    setProblems(r.data);
+  };
+
+  // ================================
+  // TEAM DELETE
+  // ================================
+  const deleteTeam = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this team?")) return;
+    await axios.delete(API_BASE + `/api/admin/teams/${id}`, hdr);
+    const r = await axios.get(API_BASE + "/api/admin/teams", hdr);
+    setTeams(r.data);
+  };
+
+  // ================================
+  // SCHEDULE FUNCTIONS
+  // ================================
+  const addSchedule = async (e) => {
+    e.preventDefault();
+    await axios.post(API_BASE + "/api/admin/schedule", sch, hdr);
+    setSch({ round: "", title: "", description: "", date: "" });
+
+    const r = await axios.get(API_BASE + "/api/schedule");
+    setSchedule(r.data);
+  };
+
+  const deleteSchedule = async (id) => {
+    await axios.delete(API_BASE + `/api/admin/schedule/${id}`, hdr);
+    const r = await axios.get(API_BASE + "/api/schedule");
+    setSchedule(r.data);
+  };
+
+  // ================================
   // SAVE ROUND WINDOWS
   // ================================
   const saveWindows = async (e) => {
     e.preventDefault();
-
-    try {
-      // FIXED — Must use admin route
-      await axios.put(
-        API_BASE + "/api/admin/event-settings",
-        {
-          round1_start_iso: r1start,
-          round1_end_iso: r1end,
-          round2_start_iso: r2start,
-          round2_end_iso: r2end,
-        },
-        hdr
-      );
-
-      // Re-fetch saved values
-      const r = await axios.get(API_BASE + "/api/admin/event-settings", hdr);
-      setR1start(r.data.round1_start_iso || "");
-      setR1end(r.data.round1_end_iso || "");
-      setR2start(r.data.round2_start_iso || "");
-      setR2end(r.data.round2_end_iso || "");
-
-      alert("Windows saved");
-    } catch (err) {
-      console.error("Save Error:", err);
-      alert(err?.response?.data?.error || "Failed to save settings");
-    }
+    await axios.put(
+      API_BASE + "/api/admin/event-settings",
+      {
+        round1_start_iso: r1start,
+        round1_end_iso: r1end,
+        round2_start_iso: r2start,
+        round2_end_iso: r2end,
+      },
+      hdr
+    );
+    alert("Windows saved");
   };
 
   // ================================
@@ -122,8 +166,9 @@ export default function Admin({ auth }) {
       <div className="card glass-card">
         <h2>Admin Panel</h2>
 
-        {/* Round Windows */}
+        {/* ROUND WINDOWS */}
         <h3 className="mt">Round Windows</h3>
+
         <form onSubmit={saveWindows} className="grid gap">
           <input className="input" placeholder="Round-1 Start (ISO)" value={r1start} onChange={(e) => setR1start(e.target.value)} />
           <input className="input" placeholder="Round-1 End (ISO)" value={r1end} onChange={(e) => setR1end(e.target.value)} />
@@ -141,17 +186,11 @@ export default function Admin({ auth }) {
           </div>
         </form>
 
-        {/* MCQ Section */}
+        {/* MCQs */}
         <h3 className="mt">MCQs</h3>
         <form onSubmit={addMcq} className="grid gap">
           {["question", "opt_a", "opt_b", "opt_c", "opt_d", "correct"].map((k) => (
-            <input
-              key={k}
-              className="input"
-              placeholder={k}
-              value={q[k]}
-              onChange={(e) => setQ({ ...q, [k]: e.target.value })}
-            />
+            <input key={k} className="input" placeholder={k} value={q[k]} onChange={(e) => setQ({ ...q, [k]: e.target.value })} />
           ))}
           <button className="btn">Add MCQ</button>
         </form>
