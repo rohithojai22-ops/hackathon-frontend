@@ -7,7 +7,7 @@ export default function useEventWindows() {
 
   React.useEffect(() => {
     axios
-      .get(API_BASE + "/api/event-settings")   // ✅ correct route
+      .get(API_BASE + "/api/event-settings")   // ✅ FIXED: correct public route
       .then((r) =>
         setWin({
           round1: {
