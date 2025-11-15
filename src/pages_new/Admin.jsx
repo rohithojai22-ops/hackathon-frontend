@@ -7,7 +7,8 @@ import { fmtIST } from "../utils/time";
 export default function Admin({ auth }) {
   if (!auth.token || auth.role !== "admin") return <Navigate to="/login" />;
 
-  const [mcqs, setMcqs] = React.useState([]);
+  // ====== STATES ======
+  const [mcqs, setMcqs] = React.useState([]);      // FIXED (missing earlier)
   const [teams, setTeams] = React.useState([]);
   const [subs, setSubs] = React.useState([]);
   const [problems, setProblems] = React.useState([]);
@@ -31,7 +32,7 @@ export default function Admin({ auth }) {
     date: "",
   });
 
-  // ==== ROUND WINDOWS ====
+  // === Round Windows ===
   const [r1start, setR1start] = React.useState("");
   const [r1end, setR1end] = React.useState("");
   const [r2start, setR2start] = React.useState("");
@@ -39,9 +40,9 @@ export default function Admin({ auth }) {
 
   const hdr = { headers: { Authorization: "Bearer " + auth.token } };
 
-  // ================================
-  // LOAD ALL ADMIN DATA
-  // ================================
+  // =====================================
+  // LOAD EVERYTHING ON PAGE LOAD
+  // =====================================
   React.useEffect(() => {
     axios.get(API_BASE + "/api/admin/mcqs", hdr).then((r) => setMcqs(r.data));
     axios.get(API_BASE + "/api/admin/teams", hdr).then((r) => setTeams(r.data));
@@ -50,7 +51,7 @@ export default function Admin({ auth }) {
 
     axios.get(API_BASE + "/api/schedule").then((r) => setSchedule(r.data));
 
-    // === Load saved round windows ===
+    // Load Round Windows
     axios.get(API_BASE + "/api/admin/windows", hdr).then((r) => {
       setR1start(r.data.r1_start ? r.data.r1_start.slice(0, 16) : "");
       setR1end(r.data.r1_end ? r.data.r1_end.slice(0, 16) : "");
@@ -59,9 +60,9 @@ export default function Admin({ auth }) {
     });
   }, [auth.token]);
 
-  // ================================
-  // SAVE WINDOWS
-  // ================================
+  // =====================================
+  // SAVE ROUND WINDOWS
+  // =====================================
   const saveWindows = async (e) => {
     e.preventDefault();
 
@@ -84,9 +85,79 @@ export default function Admin({ auth }) {
     alert("Shortlist computed successfully!");
   };
 
-  // ================================
+  // ======================================
+  // MCQ CRUD
+  // ======================================
+  const addMcq = async (e) => {
+    e.preventDefault();
+    if (!q.question.trim()) return alert("Question cannot be empty");
+
+    await axios.post(API_BASE + "/api/admin/mcqs", q, hdr);
+    const r = await axios.get(API_BASE + "/api/admin/mcqs", hdr);
+    setMcqs(r.data);
+
+    setQ({ question: "", opt_a: "", opt_b: "", opt_c: "", opt_d: "", correct: "a" });
+
+    alert("MCQ added successfully!");
+  };
+
+  const delMcq = async (id) => {
+    await axios.delete(API_BASE + `/api/admin/mcqs/${id}`, hdr);
+    const r = await axios.get(API_BASE + "/api/admin/mcqs", hdr);
+    setMcqs(r.data);
+  };
+
+  // ======================================
+  // PROBLEMS CRUD
+  // ======================================
+  const addProb = async (e) => {
+    e.preventDefault();
+    await axios.post(API_BASE + "/api/admin/problems", p, hdr);
+
+    const r = await axios.get(API_BASE + "/api/admin/problems", hdr);
+    setProblems(r.data);
+    setP({ title: "", statement: "" });
+  };
+
+  const delProb = async (id) => {
+    await axios.delete(API_BASE + `/api/admin/problems/${id}`, hdr);
+    const r = await axios.get(API_BASE + "/api/admin/problems", hdr);
+    setProblems(r.data);
+  };
+
+  // ======================================
+  // TEAMS
+  // ======================================
+  const deleteTeam = async (id) => {
+    if (!window.confirm("Are you sure?")) return;
+
+    await axios.delete(API_BASE + `/api/admin/teams/${id}`, hdr);
+    const r = await axios.get(API_BASE + "/api/admin/teams", hdr);
+    setTeams(r.data);
+  };
+
+  // ======================================
+  // SCHEDULE CRUD
+  // ======================================
+  const addSchedule = async (e) => {
+    e.preventDefault();
+
+    await axios.post(API_BASE + "/api/admin/schedule", sch, hdr);
+    setSch({ round: "", title: "", description: "", date: "" });
+
+    const r = await axios.get(API_BASE + "/api/schedule");
+    setSchedule(r.data);
+  };
+
+  const deleteSchedule = async (id) => {
+    await axios.delete(API_BASE + `/api/admin/schedule/${id}`, hdr);
+    const r = await axios.get(API_BASE + "/api/schedule");
+    setSchedule(r.data);
+  };
+
+  // ======================================
   // RENDER UI
-  // ================================
+  // ======================================
   return (
     <div className="container">
       <div className="card glass-card">
@@ -96,33 +167,18 @@ export default function Admin({ auth }) {
         <h3 className="mt">Round Windows</h3>
 
         <form onSubmit={saveWindows} className="grid gap">
-          <input
-            type="datetime-local"
-            className="input"
-            value={r1start}
-            onChange={(e) => setR1start(e.target.value)}
-          />
 
-          <input
-            type="datetime-local"
-            className="input"
-            value={r1end}
-            onChange={(e) => setR1end(e.target.value)}
-          />
+          <input type="datetime-local" className="input"
+            value={r1start} onChange={(e) => setR1start(e.target.value)} />
 
-          <input
-            type="datetime-local"
-            className="input"
-            value={r2start}
-            onChange={(e) => setR2start(e.target.value)}
-          />
+          <input type="datetime-local" className="input"
+            value={r1end} onChange={(e) => setR1end(e.target.value)} />
 
-          <input
-            type="datetime-local"
-            className="input"
-            value={r2end}
-            onChange={(e) => setR2end(e.target.value)}
-          />
+          <input type="datetime-local" className="input"
+            value={r2start} onChange={(e) => setR2start(e.target.value)} />
+
+          <input type="datetime-local" className="input"
+            value={r2end} onChange={(e) => setR2end(e.target.value)} />
 
           <button className="btn primary">Save Windows</button>
           <button className="btn" type="button" onClick={computeShortlist}>
@@ -141,13 +197,8 @@ export default function Admin({ auth }) {
         <h3 className="mt">MCQs</h3>
         <form onSubmit={addMcq} className="grid gap">
           {["question", "opt_a", "opt_b", "opt_c", "opt_d", "correct"].map((k) => (
-            <input
-              key={k}
-              className="input"
-              placeholder={k}
-              value={q[k]}
-              onChange={(e) => setQ({ ...q, [k]: e.target.value })}
-            />
+            <input key={k} className="input" placeholder={k}
+              value={q[k]} onChange={(e) => setQ({ ...q, [k]: e.target.value })} />
           ))}
           <button className="btn">Add MCQ</button>
         </form>
@@ -155,9 +206,7 @@ export default function Admin({ auth }) {
         <ul className="list mt">
           {mcqs.map((m) => (
             <li key={m._id} className="row-between">
-              <span>
-                {m.question} <em>({m.correct})</em>
-              </span>
+              <span>{m.question} <em>({m.correct})</em></span>
               <button className="btn" onClick={() => delMcq(m._id)}>Delete</button>
             </li>
           ))}
@@ -166,18 +215,10 @@ export default function Admin({ auth }) {
         {/* ===================== PROBLEMS ====================== */}
         <h3 className="mt">Problems</h3>
         <form onSubmit={addProb} className="grid gap">
-          <input
-            className="input"
-            placeholder="title"
-            value={p.title}
-            onChange={(e) => setP({ ...p, title: e.target.value })}
-          />
-          <input
-            className="input"
-            placeholder="statement"
-            value={p.statement}
-            onChange={(e) => setP({ ...p, statement: e.target.value })}
-          />
+          <input className="input" placeholder="title"
+            value={p.title} onChange={(e) => setP({ ...p, title: e.target.value })} />
+          <input className="input" placeholder="statement"
+            value={p.statement} onChange={(e) => setP({ ...p, statement: e.target.value })} />
           <button className="btn">Add Problem</button>
         </form>
 
@@ -207,32 +248,15 @@ export default function Admin({ auth }) {
 
         {/* ===================== SCHEDULE ====================== */}
         <h3 className="mt">Schedule (Public)</h3>
-
         <form onSubmit={addSchedule} className="grid four gap">
-          <input
-            className="input"
-            placeholder="round"
-            value={sch.round}
-            onChange={(e) => setSch({ ...sch, round: e.target.value })}
-          />
-          <input
-            className="input"
-            placeholder="title"
-            value={sch.title}
-            onChange={(e) => setSch({ ...sch, title: e.target.value })}
-          />
-          <input
-            className="input"
-            placeholder="description"
-            value={sch.description}
-            onChange={(e) => setSch({ ...sch, description: e.target.value })}
-          />
-          <input
-            className="input"
-            placeholder="date (YYYY-MM-DD)"
-            value={sch.date}
-            onChange={(e) => setSch({ ...sch, date: e.target.value })}
-          />
+          <input className="input" placeholder="round"
+            value={sch.round} onChange={(e) => setSch({ ...sch, round: e.target.value })} />
+          <input className="input" placeholder="title"
+            value={sch.title} onChange={(e) => setSch({ ...sch, title: e.target.value })} />
+          <input className="input" placeholder="description"
+            value={sch.description} onChange={(e) => setSch({ ...sch, description: e.target.value })} />
+          <input className="input" placeholder="date (YYYY-MM-DD)"
+            value={sch.date} onChange={(e) => setSch({ ...sch, date: e.target.value })} />
           <button className="btn primary">Add</button>
         </form>
 
