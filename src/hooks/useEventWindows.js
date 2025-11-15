@@ -8,12 +8,20 @@ export default function useEventWindows() {
   React.useEffect(() => {
     axios
       .get(API_BASE + "/api/event-settings")
-      .then((r) =>
+      .then((res) => {
+        const d = res.data || {};
+
         setWin({
-          round1: r.data.round1,
-          round2: r.data.round2,
-        })
-      )
+          round1: {
+            start_iso: d.round1_start_iso || null,
+            end_iso: d.round1_end_iso || null,
+          },
+          round2: {
+            start_iso: d.round2_start_iso || null,
+            end_iso: d.round2_end_iso || null,
+          },
+        });
+      })
       .catch(() => setWin(null));
   }, []);
 

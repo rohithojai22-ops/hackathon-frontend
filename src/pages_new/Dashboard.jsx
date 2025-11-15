@@ -26,6 +26,7 @@ export default function Dashboard({ auth }) {
   const r2 = wins?.round2;
 
   const gate = useGate(now, r2?.start_iso, r2?.end_iso, "R2");
+
   const qualified = isRound1Qualified();
 
   React.useEffect(() => {
@@ -46,6 +47,7 @@ export default function Dashboard({ auth }) {
         if (st?.data) {
           setData(st.data);
 
+          // Update local flags
           if (st.data.round1_attempted)
             localStorage.setItem("round1_done", "1");
 
@@ -74,9 +76,7 @@ export default function Dashboard({ auth }) {
 
         <h2>Welcome{me?.team?.team_name ? `, ${me.team.team_name}` : ""}</h2>
 
-        {/* ================================
-            LINKS
-        ================================= */}
+        {/* ================================ LINKS ================================ */}
         <div className="links">
 
           <Link className="link" to="/profile">Edit Profile</Link>{" • "}
@@ -84,14 +84,16 @@ export default function Dashboard({ auth }) {
           <Link className="link" to="/results">Results</Link>{" • "}
           <Link className="link" to="/round3-offline">Round 3</Link>{" • "}
 
-          {/* Round 1 always accessible */}
           <Link className="link" to="/round1">Round 1</Link>{" • "}
 
-          {/* Round 2 always shown */}
+          {/* Round 2 link shown always, but only enabled if qualified */}
           <Link
             className="link"
             to={qualified ? "/round2" : "#"}
-            style={{ opacity: qualified ? 1 : 0.4, pointerEvents: qualified ? "auto" : "none" }}
+            style={{
+              opacity: qualified ? 1 : 0.4,
+              pointerEvents: qualified ? "auto" : "none",
+            }}
           >
             Round 2
           </Link>{" • "}
@@ -99,9 +101,7 @@ export default function Dashboard({ auth }) {
           <Link className="link" to="/submit">Upload Submission</Link>
         </div>
 
-        {/* ================================
-            ROUND INFO
-        ================================= */}
+        {/* ================================ INFO ================================ */}
         <div className="mt">
 
           <p>
@@ -119,16 +119,16 @@ export default function Dashboard({ auth }) {
               {!data?.round1_attempted
                 ? "N/A"
                 : data.shortlist?.round1_qualified
-                ? "Yes"
-                : "No"}
+                  ? "Yes"
+                  : "No"}
             </b>
           </p>
 
-          {/* ===== ROUND-2 STATUS DISPLAY ===== */}
+          {/* ================= ROUND 2 STATUS BLOCK ================= */}
           <div style={{ marginTop: "15px" }}>
             <h4>Round 2 Status</h4>
 
-            {!qualified && (
+            {!qualified ? (
               <>
                 {/* NOT QUALIFIED UI */}
 
@@ -145,10 +145,9 @@ export default function Dashboard({ auth }) {
                   <p className="error">Your team is not qualified for Round-2.</p>
                 )}
               </>
-            )}
-
-            {qualified && (
+            ) : (
               <>
+                {/* QUALIFIED UI */}
                 <p>
                   Round 2 Shortlisted:{" "}
                   <b>{data?.shortlist?.round2_shortlisted ? "Yes" : "No"}</b>
@@ -157,14 +156,15 @@ export default function Dashboard({ auth }) {
             )}
           </div>
 
+          {/* ================= ROUND 3 ================= */}
           <p style={{ marginTop: "15px" }}>
             Round 3 (Offline) Participation:{" "}
             <b>
               {!data?.shortlist
                 ? "N/A"
                 : data?.shortlist?.round3_participated
-                ? "Yes"
-                : "No"}
+                  ? "Yes"
+                  : "No"}
             </b>
           </p>
 

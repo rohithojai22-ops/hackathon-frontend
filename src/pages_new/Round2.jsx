@@ -69,20 +69,13 @@ export default function Round2({ auth }) {
   }, [gate.status, auth.token, qualified]);
 
   // -------------------------------------------------------
-  // NOT QUALIFIED TEAM — UI RULES
+  //           NOT QUALIFIED TEAM UI RULES
   // -------------------------------------------------------
-
   if (!qualified) {
 
-    // BEFORE START — Show countdown
+    // BEFORE ROUND — show countdown
     if (gate.status === "locked") {
-      return (
-        <Locked
-          title="Round 2"
-          when={gate.opensAt}
-          now={now}
-        />
-      );
+      return <Locked title="Round 2" when={gate.opensAt} now={now} />;
     }
 
     // DURING ROUND — Not Qualified
@@ -98,7 +91,7 @@ export default function Round2({ auth }) {
     }
 
     // AFTER END — Not Qualified
-    if (gate.status === "closed") {
+    if (gate.status === "ended") {
       return (
         <div className="container narrow">
           <div className="card glass-card center">
@@ -111,7 +104,7 @@ export default function Round2({ auth }) {
   }
 
   // -------------------------------------------------------
-  // QUALIFIED TEAM — UI
+  //                QUALIFIED TEAM UI
   // -------------------------------------------------------
 
   if (gate.status === "loading" || loading)
@@ -126,13 +119,7 @@ export default function Round2({ auth }) {
     );
 
   if (gate.status === "locked")
-    return (
-      <Locked
-        title="Round 2 – Problems"
-        when={gate.opensAt}
-        now={now}
-      />
-    );
+    return <Locked title="Round 2 – Problems" when={gate.opensAt} now={now} />;
 
   // Already submitted
   if (mySub)
@@ -149,8 +136,8 @@ export default function Round2({ auth }) {
       </div>
     );
 
-  // Round Ended but qualified → no submission allowed
-  if (gate.status === "closed") {
+  // AFTER ROUND END — but qualified
+  if (gate.status === "ended") {
     return (
       <div className="container narrow">
         <div className="card glass-card center">
@@ -161,7 +148,7 @@ export default function Round2({ auth }) {
     );
   }
 
-  // Round Open for Qualified team
+  // ROUND IS OPEN
   return (
     <div className="container narrow">
       <div className="card glass-card">
@@ -186,7 +173,9 @@ export default function Round2({ auth }) {
         </ol>
 
         <div className="mt">
-          <Link className="btn primary" to="/submit">Upload Solution</Link>
+          <Link className="btn primary" to="/submit">
+            Upload Solution
+          </Link>
         </div>
 
       </div>
