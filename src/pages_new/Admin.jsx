@@ -44,13 +44,17 @@ export default function Admin({ auth }) {
   React.useEffect(() => {
     (async () => {
       try {
-        const [mcqR, teamR, subR, probR, schedR, winR] = await Promise.all([
+        const [
+          mcqR, teamR, subR, probR, schedR, winR
+        ] = await Promise.all([
           axios.get(API_BASE + "/api/admin/mcqs", hdr).catch(() => ({ data: [] })),
           axios.get(API_BASE + "/api/admin/teams", hdr).catch(() => ({ data: [] })),
           axios.get(API_BASE + "/api/admin/submissions", hdr).catch(() => ({ data: [] })),
           axios.get(API_BASE + "/api/admin/problems", hdr).catch(() => ({ data: [] })),
           axios.get(API_BASE + "/api/schedule").catch(() => ({ data: [] })),
-          axios.get(API_BASE + "/api/event-settings", hdr).catch(() => ({ data: {} })),
+
+          // FIXED — USE ADMIN ROUTE (your backend requires admin auth)
+          axios.get(API_BASE + "/api/admin/event-settings", hdr).catch(() => ({ data: {} })),
         ]);
 
         setMcqs(mcqR.data);
@@ -59,7 +63,6 @@ export default function Admin({ auth }) {
         setProblems(probR.data);
         setSchedule(schedR.data);
 
-        // Load window values
         setR1start(winR.data.round1_start_iso || "");
         setR1end(winR.data.round1_end_iso || "");
         setR2start(winR.data.round2_start_iso || "");
@@ -77,8 +80,9 @@ export default function Admin({ auth }) {
     e.preventDefault();
 
     try {
+      // FIXED — Must use admin route
       await axios.put(
-        API_BASE + "/api/event-settings",    // ✅ FIXED: correct route
+        API_BASE + "/api/admin/event-settings",
         {
           round1_start_iso: r1start,
           round1_end_iso: r1end,
@@ -88,8 +92,8 @@ export default function Admin({ auth }) {
         hdr
       );
 
-      // Re-fetch after saving
-      const r = await axios.get(API_BASE + "/api/event-settings", hdr);
+      // Re-fetch saved values
+      const r = await axios.get(API_BASE + "/api/admin/event-settings", hdr);
       setR1start(r.data.round1_start_iso || "");
       setR1end(r.data.round1_end_iso || "");
       setR2start(r.data.round2_start_iso || "");
@@ -118,8 +122,8 @@ export default function Admin({ auth }) {
       <div className="card glass-card">
         <h2>Admin Panel</h2>
 
+        {/* Round Windows */}
         <h3 className="mt">Round Windows</h3>
-
         <form onSubmit={saveWindows} className="grid gap">
           <input className="input" placeholder="Round-1 Start (ISO)" value={r1start} onChange={(e) => setR1start(e.target.value)} />
           <input className="input" placeholder="Round-1 End (ISO)" value={r1end} onChange={(e) => setR1end(e.target.value)} />
@@ -137,7 +141,7 @@ export default function Admin({ auth }) {
           </div>
         </form>
 
-        {/* MCQs */}
+        {/* MCQ Section */}
         <h3 className="mt">MCQs</h3>
         <form onSubmit={addMcq} className="grid gap">
           {["question", "opt_a", "opt_b", "opt_c", "opt_d", "correct"].map((k) => (
