@@ -11,7 +11,6 @@ export default function Admin({ auth }) {
   const [teams, setTeams] = React.useState([]);
   const [subs, setSubs] = React.useState([]);
   const [problems, setProblems] = React.useState([]);
-  const [schedule, setSchedule] = React.useState([]);
 
   const [q, setQ] = React.useState({
     question: "",
@@ -24,6 +23,7 @@ export default function Admin({ auth }) {
 
   const [p, setP] = React.useState({ title: "", statement: "" });
 
+  const [schedule, setSchedule] = React.useState([]);
   const [sch, setSch] = React.useState({
     round: "",
     title: "",
@@ -31,7 +31,6 @@ export default function Admin({ auth }) {
     date: "",
   });
 
-  // ROUND WINDOWS
   const [r1start, setR1start] = React.useState("");
   const [r1end, setR1end] = React.useState("");
   const [r2start, setR2start] = React.useState("");
@@ -39,40 +38,97 @@ export default function Admin({ auth }) {
 
   const hdr = { headers: { Authorization: "Bearer " + auth.token } };
 
-  // LOAD ALL ADMIN DATA
   React.useEffect(() => {
     axios.get(API_BASE + "/api/admin/mcqs", hdr).then((r) => setMcqs(r.data));
     axios.get(API_BASE + "/api/admin/teams", hdr).then((r) => setTeams(r.data));
     axios.get(API_BASE + "/api/admin/submissions", hdr).then((r) => setSubs(r.data));
     axios.get(API_BASE + "/api/admin/problems", hdr).then((r) => setProblems(r.data));
+
     axios.get(API_BASE + "/api/schedule").then((r) => setSchedule(r.data));
 
-    // LOAD WINDOWS CORRECTLY
-    axios.get(API_BASE + "/api/admin/event-settings", hdr).then((res) => {
-      const d = res.data || {};
-      setR1start(d.round1_start_iso ? d.round1_start_iso.slice(0, 16) : "");
-      setR1end(d.round1_end_iso ? d.round1_end_iso.slice(0, 16) : "");
-      setR2start(d.round2_start_iso ? d.round2_start_iso.slice(0, 16) : "");
-      setR2end(d.round2_end_iso ? d.round2_end_iso.slice(0, 16) : "");
+    axios.get(API_BASE + "/api/admin/event-settings", hdr).then((r) => {
+      setR1start(r.data.round1.start_iso || "");
+      setR1end(r.data.round1.end_iso || "");
+      setR2start(r.data.round2.start_iso || "");
+      setR2end(r.data.round2.end_iso || "");
     });
   }, [auth.token]);
 
-  // SAVE WINDOWS
+  const addMcq = async (e) => {
+    e.preventDefault();
+
+    if (!q.question.trim()) return alert("Question cannot be empty");
+
+    await axios.post(API_BASE + "/api/admin/mcqs", q, hdr);
+    const r = await axios.get(API_BASE + "/api/admin/mcqs", hdr);
+    setMcqs(r.data);
+
+    setQ({ question: "", opt_a: "", opt_b: "", opt_c: "", opt_d: "", correct: "a" });
+
+    alert("MCQ added successfully!");
+  };
+
+  const delMcq = async (id) => {
+    await axios.delete(API_BASE + `/api/admin/mcqs/${id}`, hdr);
+    const r = await axios.get(API_BASE + "/api/admin/mcqs", hdr);
+    setMcqs(r.data);
+  };
+
+  const addProb = async (e) => {
+    e.preventDefault();
+
+    await axios.post(API_BASE + "/api/admin/problems", p, hdr);
+    const r = await axios.get(API_BASE + "/api/admin/problems", hdr);
+    setProblems(r.data);
+
+    setP({ title: "", statement: "" });
+  };
+
+  const delProb = async (id) => {
+    await axios.delete(API_BASE + `/api/admin/problems/${id}`, hdr);
+    const r = await axios.get(API_BASE + "/api/admin/problems", hdr);
+    setProblems(r.data);
+  };
+
+  const deleteTeam = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this team?")) return;
+
+    await axios.delete(API_BASE + `/api/admin/teams/${id}`, hdr);
+    const r = await axios.get(API_BASE + "/api/admin/teams", hdr);
+    setTeams(r.data);
+  };
+
+  const addSchedule = async (e) => {
+    e.preventDefault();
+
+    await axios.post(API_BASE + "/api/admin/schedule", sch, hdr);
+    setSch({ round: "", title: "", description: "", date: "" });
+
+    const r = await axios.get(API_BASE + "/api/schedule");
+    setSchedule(r.data);
+  };
+
+  const deleteSchedule = async (id) => {
+    await axios.delete(API_BASE + `/api/admin/schedule/${id}`, hdr);
+    const r = await axios.get(API_BASE + "/api/schedule");
+    setSchedule(r.data);
+  };
+
   const saveWindows = async (e) => {
     e.preventDefault();
 
     await axios.put(
       API_BASE + "/api/admin/event-settings",
       {
-        round1_start_iso: r1start ? new Date(r1start).toISOString() : "",
-        round1_end_iso: r1end ? new Date(r1end).toISOString() : "",
-        round2_start_iso: r2start ? new Date(r2start).toISOString() : "",
-        round2_end_iso: r2end ? new Date(r2end).toISOString() : "",
+        round1_start_iso: r1start,
+        round1_end_iso: r1end,
+        round2_start_iso: r2start,
+        round2_end_iso: r2end,
       },
       hdr
     );
 
-    alert("Windows saved!");
+    alert("Windows saved");
   };
 
   const computeShortlist = async () => {
@@ -88,48 +144,21 @@ export default function Admin({ auth }) {
         <h3 className="mt">Round Windows</h3>
 
         <form onSubmit={saveWindows} className="grid gap">
-
-          <input
-            type="datetime-local"
-            className="input"
-            value={r1start}
-            onChange={(e) => setR1start(e.target.value)}
-          />
-
-          <input
-            type="datetime-local"
-            className="input"
-            value={r1end}
-            onChange={(e) => setR1end(e.target.value)}
-          />
-
-          <input
-            type="datetime-local"
-            className="input"
-            value={r2start}
-            onChange={(e) => setR2start(e.target.value)}
-          />
-
-          <input
-            type="datetime-local"
-            className="input"
-            value={r2end}
-            onChange={(e) => setR2end(e.target.value)}
-          />
+          <input className="input" placeholder="Round-1 Start (ISO)" value={r1start} onChange={(e) => setR1start(e.target.value)} />
+          <input className="input" placeholder="Round-1 End (ISO)" value={r1end} onChange={(e) => setR1end(e.target.value)} />
+          <input className="input" placeholder="Round-2 Start (ISO)" value={r2start} onChange={(e) => setR2start(e.target.value)} />
+          <input className="input" placeholder="Round-2 End (ISO)" value={r2end} onChange={(e) => setR2end(e.target.value)} />
 
           <button className="btn primary">Save Windows</button>
-          <button className="btn" type="button" onClick={computeShortlist}>
-            Compute Shortlist
-          </button>
+          <button className="btn" type="button" onClick={computeShortlist}>Compute Shortlist</button>
 
           <div className="muted small">
-            <div>R1 Start: <b>{r1start ? fmtIST(new Date(r1start)) : "—"}</b></div>
-            <div>R1 End: <b>{r1end ? fmtIST(new Date(r1end)) : "—"}</b></div>
-            <div>R2 Start: <b>{r2start ? fmtIST(new Date(r2start)) : "—"}</b></div>
-            <div>R2 End: <b>{r2end ? fmtIST(new Date(r2end)) : "—"}</b></div>
+            <div>R1 Start: <b>{r1start ? fmtIST(r1start) : "—"}</b></div>
+            <div>R1 End: <b>{r1end ? fmtIST(r1end) : "—"}</b></div>
+            <div>R2 Start: <b>{r2start ? fmtIST(r2start) : "—"}</b></div>
+            <div>R2 End: <b>{r2end ? fmtIST(r2end) : "—"}</b></div>
           </div>
         </form>
-
 
         <h3 className="mt">MCQs</h3>
 
