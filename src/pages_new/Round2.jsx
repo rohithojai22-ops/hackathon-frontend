@@ -20,10 +20,11 @@ export default function Round2({ auth }) {
 
   const now = useServerClock();
   const wins = useEventWindows();
-  const r2 = wins?.round2;
+ const start = wins?.round2_start_iso;
+const end   = wins?.round2_end_iso;
 
-  // IMPORTANT: r2.start_iso, r2.end_iso MUST MATCH BACKEND
-  const gate = useGate(now, r2?.start_iso, r2?.end_iso, "R2");
+const gate = useGate(now, start, end, "R2");
+
 
   const [problems, setProblems] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
