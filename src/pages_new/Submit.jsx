@@ -24,9 +24,11 @@ export default function Submit({ auth }) {
 
   const wins = useEventWindows();
   const now = useServerClock();
-  const r2 = wins?.round2;
+const start = wins?.round2_start_iso;
+const end   = wins?.round2_end_iso;
 
-  const gate = useGate(now, r2?.start_iso, r2?.end_iso, "R2");
+const gate = useGate(now, start, end, "R2");
+
 
   const [file, setFile] = React.useState(null);
   const [already, setAlready] = React.useState(false);
@@ -89,21 +91,24 @@ export default function Submit({ auth }) {
 
         {already && <p className="error">You already uploaded. You cannot upload again.</p>}
 
-        {gate.status === "locked" && (
-          <>
-            <p className="muted">Submissions will open at <b>{fmtIST(r2.start_iso)}</b>.</p>
-            <Countdown now={now} target={new Date(r2.start_iso)} />
-          </>
-        )}
+{gate.status === "locked" && (
+  <>
+    <p className="muted">
+      Submissions will open at <b>{fmtIST(start)}</b>.
+    </p>
+    <Countdown now={now} target={new Date(start)} />
+  </>
+)}
 
-        {gate.status === "open" && r2?.end_iso && (
-          <>
-            <p className="muted">
-              Submissions close at <b>{fmtIST(r2.end_iso)}</b>.
-            </p>
-            <Countdown now={now} target={new Date(r2.end_iso)} prefix="Closes in" />
-          </>
-        )}
+{gate.status === "open" && end && (
+  <>
+    <p className="muted">
+      Submissions close at <b>{fmtIST(end)}</b>.
+    </p>
+    <Countdown now={now} target={new Date(end)} prefix="Closes in" />
+  </>
+)}
+
 
         <form onSubmit={doUpload} className="grid gap">
           <input type="file" onChange={(e) => setFile(e.target.files[0])} />
